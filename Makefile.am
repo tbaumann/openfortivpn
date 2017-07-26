@@ -14,6 +14,14 @@ openfortivpn_LDADD = $(OPENSSL_LIBS)
 
 DISTCHECK_CONFIGURE_FLAGS = CFLAGS=-Werror
 
+if HAVE_SYSTEMD
+openfortivpn_SOURCES += src/systemd.h src/systemd.c
+openfortivpn_CFLAGS  += $(systemd_CFLAGS)
+LIBS    += $(systemd_LIBS)
+endif
+
+
+
 confdir=$(sysconfdir)/openfortivpn
 datadir=$(prefix)/share/openfortivpn
 data_DATA=etc/openfortivpn/config.template

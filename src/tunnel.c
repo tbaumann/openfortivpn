@@ -50,6 +50,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <assert.h>
+#include "log.h"
+#ifdef HAVE_SYSTEMD
+#include "systemd.h"
+#endif
 
 struct ofv_varr {
 	unsigned cap;		// current capacity
@@ -96,7 +100,15 @@ static int on_ppp_if_up(struct tunnel *tunnel)
 
 	if (tunnel->config->set_dns && !tunnel->config->pppd_use_peerdns) {
 		log_info("Adding VPN nameservers...\n");
+#ifdef HAVE_SYSTEMD
+		if ( tunnel->config->use_systemd  ) {
+			systemd_add_nameservers(tunnel);
+		}else{
+			ipv4_add_nameservers_to_resolv_conf(tunnel);
+		}
+#else
 		ipv4_add_nameservers_to_resolv_conf(tunnel);
+#endif
 	}
 
 	log_info("Tunnel is up and running.\n");
@@ -115,7 +127,15 @@ static int on_ppp_if_down(struct tunnel *tunnel)
 
 	if (tunnel->config->set_dns && !tunnel->config->pppd_use_peerdns) {
 		log_info("Removing VPN nameservers...\n");
+#ifdef HAVE_SYSTEMD
+		if ( tunnel->config->use_systemd ) {
+			systemd_del_nameservers(tunnel);
+		}else{
+			ipv4_del_nameservers_from_resolv_conf(tunnel);
+		}
+#else
 		ipv4_del_nameservers_from_resolv_conf(tunnel);
+#endif
 	}
 
 	return 0;
@@ -773,6 +793,9 @@ int run_tunnel(struct vpn_config *config)
 		.ipv4.ns1_addr.s_addr = 0,
 		.ipv4.ns2_addr.s_addr = 0,
 		.on_ppp_if_up = on_ppp_if_up,
+#ifdef HAVE_SYSTEMD
+	        .systemd.bus = NULL,
+#endif
 		.on_ppp_if_down = on_ppp_if_down
 	};
 

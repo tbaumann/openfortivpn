@@ -78,6 +78,8 @@ Set if openfortivpn should add VPN nameservers in /etc/resolv.conf when
 tunnel is up. If used multiple times, the last one takes priority.
 
 \fB\-\-no-dns\fR is the same as \fB\-\-set-dns=\fI0\fR.
+\fB\-\-no-systemd\fR
+Do not update systemd-resolve use /etc/resolv.conf instead.
 .TP
 \fB\-\-ca-file=\fI<file>\fR
 Use specified PEM-encoded certificate bundle instead of system-wide store to

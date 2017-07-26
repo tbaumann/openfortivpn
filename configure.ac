@@ -17,10 +17,36 @@ AC_CANONICAL_HOST
 
 AM_SILENT_RULES([yes])
 
+AC_ARG_WITH([systemd],
+	        AS_HELP_STRING([--without-systemd], [Ignore presence of systemd and disable it]))
 # Checks for libraries.
 PKG_CHECK_MODULES(OPENSSL, [libcrypto >= 0.9.8 libssl >= 0.9.8], [], [AC_MSG_ERROR([Cannot find OpenSSL 0.9.8 or higher.])])
 AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([Cannot find libpthread.])])
 AC_CHECK_LIB([util], [forkpty], [], [AC_MSG_ERROR([Cannot find libutil.])])
+
+AS_IF([test "x$with_systemd" != "xno"],
+        [
+		PKG_CHECK_MODULES([systemd], [libsystemd], [
+			have_systemd=yes
+		], [
+			have_systemd=no
+		   ]
+		)
+	], [
+		have_systemd=no
+	]
+	)
+
+AS_IF([test "x$have_systemd" = "xyes"],
+        [
+		AC_DEFINE([HAVE_SYSTEMD], [1], [Use SYSTEMD])
+		AM_CONDITIONAL([HAVE_SYSTEMD], true)
+	], [
+		AC_MSG_NOTICE([Cannot find libsystemd.])
+		AM_CONDITIONAL([HAVE_SYSTEMD], false)
+		AS_IF( [test "x$with_systemd" = "xyes"], [ AC_MSG_ERROR([systemd requested but not found]) ])
+	])
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h assert.h ctype.h errno.h fcntl.h getopt.h ifaddrs.h limits.h mach/mach.h netdb.h net/if.h netinet/in.h netinet/tcp.h net/route.h pty.h semaphore.h signal.h stdarg.h stddef.h stdint.h stdio.h stdlib.h string.h strings.h sys/ioctl.h syslog.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/wait.h termios.h unistd.h util.h])
@@ -50,4 +76,9 @@ AC_CHECK_FUNCS([X509_check_host])
 CPPFLAGS="${save_openssl_CPPFLAGS}"
 LIBS="${save_openssl_LIBS}"
 
+AC_SUBST([systemd_CFLAGS])
+AC_SUBST([systemd_LIBS])
+
+
+#AC_CONFIG_FILES([Makefile])
 AC_OUTPUT(Makefile)

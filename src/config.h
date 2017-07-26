@@ -84,6 +84,10 @@ struct vpn_config {
 	int			insecure_ssl;
 	char			*cipher_list;
 	struct x509_digest	*cert_whitelist;
+#ifdef HAVE_SYSTEMD
+  int use_systemd;
+#endif
+
 };
 
 int add_trusted_cert(struct vpn_config *cfg, const char *digest);

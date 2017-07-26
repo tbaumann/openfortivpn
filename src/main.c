@@ -32,6 +32,7 @@
 "                    [--realm=<realm>] [--otp=<otp>] [--set-routes=<0|1>]\n" \
 "                    [--half-internet-routes=<0|1>] [--set-dns=<0|1>]\n" \
 "                    [--pppd-no-peerdns] [--pppd-log=<file>]\n" \
+"                    [--no-systemd]\n" \
 "                    [--pppd-ifname=<string>] [--pppd-ipparam=<string>]\n" \
 "                    [--pppd-call=<name>]\n" \
 "                    [--pppd-plugin=<file>] [--ca-file=<file>]\n" \
@@ -68,6 +69,8 @@
 "  --set-dns=[01]                Set if openfortivpn should add VPN name servers in\n" \
 "                                /etc/resolv.conf\n" \
 "  --no-dns                      Do not reconfigure DNS, same as --set-dns=0\n" \
+"  --no-systemd                  Do not update nameservers in systemd-resolve\n" \
+"                                use resolv.conf instead\n" \
 "  --ca-file=<file>              Use specified PEM-encoded certificate bundle\n" \
 "                                instead of system-wide store to verify the gateway\n" \
 "                                certificate.\n" \
@@ -174,6 +177,9 @@ int main(int argc, char **argv)
 		.verify_cert = 1,
 		.insecure_ssl = 0,
 		.cipher_list = NULL,
+#ifdef HAVE_SYSTEMD
+	        .use_systemd = 1,
+#endif
 		.cert_whitelist = NULL
 	};
 
@@ -205,6 +211,9 @@ int main(int argc, char **argv)
 		{"pppd-ifname",     required_argument, 0, 0},
 		{"pppd-call",       required_argument, 0, 0},
 		{"plugin",          required_argument, 0, 0}, // deprecated
+#ifdef HAVE_SYSTEMD
+		{"no-systemd",      no_argument, &cfg.use_systemd, 0},
+#endif
 		{0, 0, 0, 0}
 	};
 

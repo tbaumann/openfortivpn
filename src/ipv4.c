@@ -834,6 +834,7 @@ int ipv4_restore_routes(struct tunnel *tunnel)
 	return 0;
 }
 
+
 int ipv4_add_nameservers_to_resolv_conf(struct tunnel *tunnel)
 {
 	int ret = -1;
@@ -846,6 +847,8 @@ int ipv4_add_nameservers_to_resolv_conf(struct tunnel *tunnel)
 
 	if (tunnel->ipv4.ns1_addr.s_addr == 0)
 		return 1;
+
+	log_info("Updating /etc/resolv.conf...\n");
 
 	file = fopen("/etc/resolv.conf", "r+");
 	if (file == NULL) {

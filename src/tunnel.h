@@ -32,6 +32,9 @@
 #include "config.h"
 #include "io.h"
 #include "ipv4.h"
+#ifdef HAVE_SYSTEMD
+#include "systemd.h"
+#endif
 
 #include <openssl/ssl.h>
 #include <sys/types.h>
@@ -69,6 +72,9 @@ struct tunnel {
 	SSL	*ssl_handle;
 
 	struct ipv4_config ipv4;
+#ifdef HAVE_SYSTEMD
+  struct systemd_config systemd;
+#endif
 
 	int (*on_ppp_if_up)(struct tunnel *);
 	int (*on_ppp_if_down)(struct tunnel *);

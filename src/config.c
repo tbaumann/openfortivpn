@@ -259,6 +259,16 @@ int load_config(struct vpn_config *cfg, const char *filename)
 			cfg->insecure_ssl = insecure_ssl;
 		} else if (strcmp(key, "cipher-list") == 0) {
 			cfg->cipher_list = strdup(val);
+#ifdef HAVE_SYSTEMD
+		} else if (strcmp(key, "use-systemd") == 0) {
+			int use_systemd = strtob(val);
+			if (use_systemd < 0) {
+				log_warn("Bad use-systemd in config file: \"%s\".\n",
+				         val);
+				continue;
+			}
+			cfg->use_systemd = use_systemd;
+#endif
 		} else {
 			log_warn("Bad key in config file: \"%s\".\n", key);
 			goto err_free;
